@@ -1,0 +1,237 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Amsterdam</title>
+    <script src="amsterdam.js"></script>
+	<script>
+			var monthName= ["January","February","March","April","May","June","July",
+					"August","September","October","November","December"];
+	</script>
+  
+</head>
+<body>
+    
+	<h2> Amsterdam</h2>
+    <p id="detailsComboDiv"></p>
+    <p id="details"></p>
+    <H2>Tempatures</H2>
+    <p id="max_temp"></p>
+    <p id="min_temp"></p>
+    <p><div id="chart_temp_div"></div></p>
+	
+    <p id="imagesDiv"></p>
+
+
+
+    <script>
+
+        console.log(amsterdam);
+
+		
+        var myObj = JSON.stringify(amsterdam.results[0].structured_content.sections[3].sections[1]);
+		
+		var jsonData = JSON.parse(myObj);
+
+		var strCombo = "<select id=\"detailsSelect\" onchange=\"getDetails()\">";
+		
+		for (var i = 0; i < jsonData.topics.length; i++) 
+		{
+			var counter = jsonData.topics[i];
+			
+			strCombo += "<option value=\"" + counter.body +"\">" + counter.title + "</option>";
+
+			if(i == 0)
+			  document.getElementById("details").innerHTML = counter.body;
+
+		}	
+		strCombo += "</select>";
+		
+        document.getElementById("detailsComboDiv").innerHTML = strCombo;
+
+		var dataMinTemp=[];
+		var dataMaxTemp=[];
+
+		//Max Tempature
+		var temperature = JSON.stringify(amsterdam.results[0].climate.temperature.average_max);
+		var jsonTemp = JSON.parse(temperature);
+		var maxtempMonth = 0;
+		var maxtemp = 0;
+		console.log("Max temp:")
+		
+
+		for (var i = 0; i < jsonTemp.months.length; i++)
+		{
+			dataMaxTemp.push(jsonTemp.months[i]);
+			if(i == 0)
+			{
+				maxtemp = jsonTemp.months[i];
+				maxtempMonth = i + 1;
+			}
+			else
+			{	
+				if(jsonTemp.months[i] > maxtemp)
+				{	
+					maxtemp = jsonTemp.months[i];
+					maxtempMonth = i;
+				}
+			}
+		}
+			
+		console.log(maxtemp);
+
+		var strMax = "<H2>Max tempature</H2>";
+		strMax += "<table>";
+		for (var i = 0; i < jsonTemp.months.length; i++)
+		{
+			strMax += "<tr>";
+			if(jsonTemp.months[i] == maxtemp)
+			{	
+				strMax += "<td width=\"100px\">";
+				strMax += "<b>" + monthName[i] + "</b></td>";
+
+				strMax += "<td>";
+				strMax += "<b>" + maxtemp +  "&nbsp;celsius" + "</b>" + "</td>";
+			}
+			else
+			{
+				strMax += "<td width=\"100px\">";
+				strMax += monthName[i] + "</td>";
+
+				strMax += "<td>";
+				strMax += jsonTemp.months[i] +  "&nbsp;celsius" + "</td>";
+			}
+			strMax += "</tr>";
+		}
+		strMax += "</table>";
+
+        document.getElementById("max_temp").innerHTML = strMax;
+		
+		// Draw the chart and set the chart values
+//		var chartdata = new google.visualization.arrayToDataTable(data);
+
+		//Min Tempature
+		temperature = JSON.stringify(amsterdam.results[0].climate.temperature.average_min);
+		jsonTemp = JSON.parse(temperature);
+		var mintempMonth = 0;
+		var mintemp = 0;
+		console.log("Min temp:")
+		for (var i = 0; i < jsonTemp.months.length; i++)
+		{
+			dataMinTemp.push(jsonTemp.months[i]);
+			
+			if(i == 0)
+			{
+				mintemp = jsonTemp.months[i];
+				mintempMonth = i + 1;
+			}
+			else
+			{	
+				if(jsonTemp.months[i] < mintemp)
+				{	
+					mintemp = jsonTemp.months[i];
+					mintempMonth = i;
+				}
+			}
+		}
+		console.log(mintemp);
+
+		var strMin = "<H2>Min tempature</H2>";
+		strMin += "<table>";
+		for (var i = 0; i < jsonTemp.months.length; i++)
+		{
+			strMin += "<tr>";
+			if(jsonTemp.months[i] == mintemp)
+			{	
+				strMin += "<td width=\"100px\">";
+				strMin += "<b>" + monthName[i] + "</b></td>";
+
+				strMin += "<td>";
+				strMin += "<b>" + mintemp +  "&nbsp;celsius" + "</b>" + "</td>";
+			}
+			else
+			{
+				strMin += "<td width=\"100px\">";
+				strMin += monthName[i] + "</td>";
+
+				strMin += "<td>";
+				strMin += jsonTemp.months[i] +  "&nbsp;celsius" + "</td>";
+			}
+			strMin += "</tr>";
+		}
+		strMin += "</table>";
+
+        document.getElementById("min_temp").innerHTML = strMin;
+		
+		
+		//Images
+        myObj = JSON.stringify(amsterdam.results[0]);
+		
+		jsonData = JSON.parse(myObj);
+
+		var strImges = "<H2>Images from Amsterdam</H2>";
+		strImges += "<center> <table><tr>";
+		for (var i = 0; i < jsonData.images.length; i++)
+		{
+			if(i > 0 && i % 3 == 0)
+			{
+				strImges += "</tr>";
+				if(i + 1 < jsonData.images.length)
+					strImges += "<tr>";
+			}
+		
+			strImges += "<td>";
+			strImges += "<img src=\"" + jsonData.images[i].source_url + "\"" + "alt=\"" + jsonData.images[i].owner + "\" style=\"width:100%;max-width:300px\"/><br>Owner:&nbsp;" + jsonData.images[i].owner;
+			strImges += "</td>";
+
+
+		}
+		strImges += "</tr></table>";
+		
+        document.getElementById("imagesDiv").innerHTML = strImges;
+		
+		
+   </script>
+
+	<script>
+		function getDetails() {
+		  var x = document.getElementById("detailsSelect").value;
+		  document.getElementById("details").innerHTML = x;
+		}
+	</script>
+	
+	<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+		<script type="text/javascript" src="https://www.google.com/jsapi"></script>
+		<script type="text/javascript">
+		  google.load("visualization", "1", {packages:["corechart"]});
+		  google.setOnLoadCallback(drawChart);
+		  function drawChart() {
+		  
+			var data=[];
+			var Header= ['Month', 'Temp (Min)', 'Temp (Max)'];
+			data.push(Header);
+	
+			if(dataMinTemp.length == dataMaxTemp.length)
+			{
+				for (var i = 0; i < 12; i++)
+				{
+					var temp=[];
+					temp.push(monthName[i]);
+					temp.push(dataMinTemp[i]);
+					temp.push(dataMaxTemp[i]);
+
+					data.push(temp);
+				}
+			}
+
+			var data = google.visualization.arrayToDataTable(data);
+		  
+
+			var chart = new google.visualization.ColumnChart(document.getElementById('chart_temp_div'));
+			chart.draw(data, {width: 800, height: 350, legend: 'bottom', title: 'Tempature'});
+		  }
+    </script>
+
+</body>
+</html>
+
